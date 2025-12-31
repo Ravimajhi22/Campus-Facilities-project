@@ -1,0 +1,48 @@
+package com.campusFacilities.www.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.campusFacilities.www.model.Library.IssueRecord;
+import com.campusFacilities.www.service.Imp.LibraryServiceImpl;
+
+@RestController
+@RequestMapping("/library")
+public class LibraryController {
+
+    @Autowired
+    private LibraryServiceImpl libraryService;
+
+    // Issue Book
+    @PostMapping("/issue")
+    public IssueRecord issueBook(@RequestBody IssueRecord issueRecord) {
+        return libraryService.issueBook(issueRecord);
+    }
+
+    // Return Book
+    @PutMapping("/return/{id}")
+    public IssueRecord returnBook(@PathVariable Long id) {
+        return libraryService.returnBook(id);
+    }
+
+    // Get all issued books
+    @GetMapping("/issues")
+    public List<IssueRecord> getAllIssuedBooks() {
+        return libraryService.getAllIssuedBooks();
+    }
+
+    // Update IssueRecord
+    @PutMapping("/update/{id}")
+    public IssueRecord updateIssueRecord(@PathVariable Long id, @RequestBody IssueRecord updatedRecord) {
+        return libraryService.updateIssueRecord(id, updatedRecord);
+    }
+
+    // Delete IssueRecord
+    @DeleteMapping("/delete/{id}")
+    public String deleteIssueRecord(@PathVariable Long id) {
+        libraryService.deleteIssueRecord(id);
+        return "Issue record deleted successfully!";
+    }
+}

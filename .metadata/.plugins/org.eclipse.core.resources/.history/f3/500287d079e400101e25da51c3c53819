@@ -1,0 +1,40 @@
+package com.campusFacilities.www.service;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.campusFacilities.www.model.Library.IssueRecord;
+import com.campusFacilities.www.repository.Library.IssueRecordRepository;
+
+@Service
+public class IssueRecordServiceImpl implements IssueRecordService {
+
+    @Autowired
+    private IssueRecordRepository issueRecordRepository;
+
+   
+    public IssueRecord issueBook(IssueRecord issueRecord) {
+        return issueRecordRepository.saveAll((Iterable<S>) issueRecord);
+    }
+
+    public List<IssueRecord> getAllIssues() {
+        return issueRecordRepository.findAll();
+    }
+
+  
+    public IssueRecord getIssueById(Long id) {
+        return issueRecordRepository.findById(id).orElse(null);
+    }
+
+
+    public IssueRecord returnBook(Long id) {
+        IssueRecord record = issueRecordRepository.findById(id).orElse(null);
+        if (record != null) {
+            record.setReturnDate(LocalDate.now());
+            return issueRecordRepository.save(record);
+        }
+        return null;
+    }
+}

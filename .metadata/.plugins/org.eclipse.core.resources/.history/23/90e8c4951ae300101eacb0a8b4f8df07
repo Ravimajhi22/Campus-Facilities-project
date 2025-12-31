@@ -1,0 +1,11 @@
+package com.campusFacilities.www.repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.campusFacilities.www.model.Transport.Bus;
+import com.campusFacilities.www.model.Transport.BusPass;
+
+
+@Repository
+public interface TransportRepository extends JpaRepository<Bus, Long>, <BusPass, Long>,<RouteWay, Long> {
+}

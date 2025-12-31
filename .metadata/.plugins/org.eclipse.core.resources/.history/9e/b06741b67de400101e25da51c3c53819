@@ -1,0 +1,7 @@
+package com.campusFacilities.www.repository.Library;
+import com.campusFacilities.www.model.Library.*;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BookRepository extends JpaRepository<book, Long> {
+}

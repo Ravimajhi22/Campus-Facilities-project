@@ -1,0 +1,20 @@
+package com.campusFacilities.www.service.Imp;
+import java.awt.print.Book;
+import java.util.List;
+
+import com.campusFacilities.www.model.Library.IssueRecord;
+
+	public interface LibraryService 
+	{
+
+	    Book addBook(Book book);
+
+	    List<Book> getAllBooks();
+
+	    IssueRecord issueBook(IssueRecord issueRecord);
+
+	    IssueRecord returnBook(Long issueId);
+
+	    List<IssueRecord> getAllIssuedBooks();
+	}
+

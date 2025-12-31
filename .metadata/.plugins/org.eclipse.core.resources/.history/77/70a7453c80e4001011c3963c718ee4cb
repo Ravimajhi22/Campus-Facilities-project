@@ -1,0 +1,94 @@
+package com.campusFacilities.www.service.Imp;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.campusFacilities.www.model.Library.Book;
+import com.campusFacilities.www.model.Library.IssueRecord;
+import com.campusFacilities.www.repository.Library.BookRepository;
+import com.campusFacilities.www.repository.Library.IssueRecordRepository;
+
+@Service
+public class LibraryServiceImpl {
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private IssueRecordRepository issueRecordRepository;
+
+    // ================= BOOK OPERATIONS =================
+
+    // Add Book
+    public Book addBook(Book book) {
+        book.setStatus("AVAILABLE");
+        return bookRepository.save(book);
+    }
+
+    // Update Book
+    public Book updateBook(Long bookId, Book bookDetails) {
+        Book book = bookRepository.findById(bookId).orElse(null);
+
+        if (book != null) {
+            book.setTitle(bookDetails.getTitle());
+            book.setAuthor(bookDetails.getAuthor());
+            book.setCategory(bookDetails.getCategory());
+            book.setStatus(bookDetails.getStatus());
+            return bookRepository.save(book);
+        }
+        return null;
+    }
+
+    // Delete Book
+    public void deleteBook(Long bookId) {
+        bookRepository.deleteById(bookId);
+    }
+
+    // Get All Books
+    public List<Book> getAllBooks() {
+        return bookRepository.findAll();
+    }
+
+    // ================= ISSUE OPERATIONS =================
+
+    // Issue Book
+    public IssueRecord issueBook(IssueRecord issueRecord) {
+        Book book = issueRecord.getBook();
+        book.setStatus("ISSUED");
+        bookRepository.save(book);
+
+        issueRecord.setIssueDate(LocalDate.now());
+        issueRecord.setDueDate(LocalDate.now().plusDays(14));
+
+        return issueRecordRepository.save(issueRecord);
+    }
+
+    // Return Book
+    public IssueRecord returnBook(Long issueId) {
+        IssueRecord record = issueRecordRepository.findById(issueId).orElse(null);
+
+        if (record != null) {
+            record.setReturnDate(LocalDate.now());
+
+            Book book = record.getBook();
+            book.setStatus("AVAILABLE");
+            bookRepository.save(book);
+
+            return issueRecordRepository.save(record);
+        }
+        return null;
+    }
+
+    // Delete Issue Record
+    public void deleteIssueRecord(Long issueId) {
+        issueRecordRepository.deleteById(issueId);
+    }
+
+    // Get All Issued Books
+    public List<IssueRecord> getAllIssuedBooks() {
+        return issueRecordRepository.findAll();
+    }
+}

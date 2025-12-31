@@ -1,0 +1,31 @@
+package com.campusFacilities.www.model.Transport;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name="Bus")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+
+public class Bus {
+	
+	@Id
+	private Long busNum;
+	
+	@Column
+	private String DriverName;
+	
+	@Column
+	private String Contact;
+	
+	
+
+
+}

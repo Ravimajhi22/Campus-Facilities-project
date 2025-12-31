@@ -1,0 +1,60 @@
+package com.campusFacilities.www.service.Imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.campusFacilities.www.model.Transport.Bus;
+import com.campusFacilities.www.model.Transport.BusPass;
+import com.campusFacilities.www.model.Transport.RouteWay;
+import com.campusFacilities.www.repository.BusPassRepository;
+import com.campusFacilities.www.repository.BusRepository;
+import com.campusFacilities.www.repository.RouteWayRepository;
+
+@Service
+public class TransportService {
+
+    @Autowired
+    private BusRepository busRepository;
+
+    @Autowired
+    private BusPassRepository busPassRepository;
+
+    @Autowired
+    private RouteWayRepository routeWayRepository;
+
+    /* -------- BUS -------- */
+
+    public Bus addBus(Bus bus) {
+        return busRepository.save(bus);
+    }
+
+    public Bus addBus(Long busNum, String driverName, String contact) {
+        Bus bus = new Bus();
+        bus.setBusNum(busNum);
+        bus.setDriverName(driverName);
+        bus.setContact(contact);
+        return busRepository.save(bus);
+    }
+
+    public List<Bus> getAllBuses() {
+        return busRepository.findAll();
+    }
+
+    /* -------- BUS PASS -------- */
+
+    public BusPass addBusPass(BusPass busPass) {
+        return busPassRepository.save(busPass);
+    }
+
+    /* -------- ROUTE WAY -------- */
+
+    public RouteWay addRouteWay(RouteWay routeWay) {
+        return routeWayRepository.save(routeWay);
+    }
+
+    public List<RouteWay> getAllRoutes() {
+        return routeWayRepository.findAll();
+    }
+}

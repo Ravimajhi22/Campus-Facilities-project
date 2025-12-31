@@ -1,0 +1,36 @@
+package com.campusFacilities.www.service.Imp;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.campusFacilities.www.model.Transport.Bus;
+import com.campusFacilities.www.repository.TransportRepository;
+
+
+@Service
+public class TransportService {
+
+    @Autowired
+    private TransportRepository transportRepository;
+
+   
+    public Bus addBus(Bus bus) {
+        return transportRepository.save(bus);
+    }
+
+    
+    public Bus addBus(Long busNum, String driverName, String contact) 
+    {
+        Bus bus = new Bus();
+        bus.setBusNum(busNum);
+        bus.setDriverName(driverName);
+        bus.setContact(contact);
+        return transportRepository.save(bus);
+    }
+
+
+	public List<Bus> getAllBuses() {
+		
+		return null;
+	}
+}

@@ -1,0 +1,18 @@
+package com.campusFacilities.www.service.Imp;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.campusFacilities.www.repository.TransportRepository;
+
+@Service
+public class TransportService {
+	
+	@Autowired
+	private TransportRepository transport;  
+
+	
+	public Transport addBusNum(busNum busnum)
+	{
+		return TransportRepository.save(busnum)
+}
+
+}

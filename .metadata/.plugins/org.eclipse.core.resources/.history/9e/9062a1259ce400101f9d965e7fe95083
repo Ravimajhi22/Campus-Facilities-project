@@ -1,0 +1,134 @@
+package com.campusFacilities.www.service.Imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.campusFacilities.www.model.Transport.Bus;
+import com.campusFacilities.www.model.Transport.BusPass;
+import com.campusFacilities.www.model.Transport.RouteWay;
+import com.campusFacilities.www.model.Transport.Stop;
+import com.campusFacilities.www.repository.BusPassRepository;
+import com.campusFacilities.www.repository.RouteWayRepository;
+import com.campusFacilities.www.repository.StopRepository;
+import com.campusFacilities.www.repository.TransportRepository;
+
+@Service
+public class TransportService {
+
+    @Autowired
+    private TransportRepository busRepository;
+
+    @Autowired
+    private RouteWayRepository routeWayRepository;
+
+    @Autowired
+    private StopRepository stopRepository;
+
+    @Autowired
+    private BusPassRepository busPassRepository;
+
+    // ================= BUS CRUD =================
+
+    public Bus addBus(Bus bus) {
+        return busRepository.save(bus);
+    }
+
+    public List<Bus> getAllBuses() {
+        return busRepository.findAll();
+    }
+
+    public Bus updateBus(Long busId, Bus bus) {
+        Bus existing = busRepository.findById(busId)
+                .orElseThrow(() -> new RuntimeException("Bus not found"));
+
+        existing.setBusNumber(bus.getBusNumber());
+        existing.setDriverName(bus.getDriverName());
+        existing.setDriverContact(bus.getDriverContact());
+        existing.setCapacity(bus.getCapacity());
+        existing.setRoute(bus.getRoute());
+
+        return busRepository.save(existing);
+    }
+
+    public void deleteBus(Long busId) {
+        busRepository.deleteById(busId);
+    }
+
+    // ================= ROUTE CRUD =================
+
+    public RouteWay addRoute(RouteWay routeWay) {
+        return routeWayRepository.save(routeWay);
+    }
+
+    public List<RouteWay> getAllRoutes() {
+        return routeWayRepository.findAll();
+    }
+
+    public RouteWay updateRoute(Long routeId, RouteWay routeWay) {
+        RouteWay existing = routeWayRepository.findById(routeId)
+                .orElseThrow(() -> new RuntimeException("Route not found"));
+
+        existing.setRouteName(routeWay.getRouteName());
+        existing.setStartPoint(routeWay.getStartPoint());
+        existing.setEndPoint(routeWay.getEndPoint());
+
+        return routeWayRepository.save(existing);
+    }
+
+    public void deleteRoute(Long routeId) {
+        routeWayRepository.deleteById(routeId);
+    }
+
+    // ================= STOP CRUD =================
+
+    public Stop addStop(Stop stop) {
+        return stopRepository.save(stop);
+    }
+
+    public List<Stop> getStopsByRoute(Long routeId) {
+        return stopRepository.findByRouteRouteIdOrderBySequenceNumber(routeId);
+    }
+
+    public Stop updateStop(Long stopId, Stop stop) {
+        Stop existing = stopRepository.findById(stopId)
+                .orElseThrow(() -> new RuntimeException("Stop not found"));
+
+        existing.setStopName(stop.getStopName());
+        existing.setSequenceNumber(stop.getSequenceNumber());
+        existing.setRoute(stop.getRoute());
+
+        return stopRepository.save(existing);
+    }
+
+    public void deleteStop(Long stopId) {
+        stopRepository.deleteById(stopId);
+    }
+
+    // ================= BUS PASS CRUD =================
+
+    public BusPass addBusPass(BusPass busPass) {
+        return busPassRepository.save(busPass);
+    }
+
+    public List<BusPass> getAllBusPasses() {
+        return busPassRepository.findAll();
+    }
+
+    public BusPass updateBusPass(Long passId, BusPass busPass) {
+        BusPass existing = busPassRepository.findById(passId)
+                .orElseThrow(() -> new RuntimeException("Bus pass not found"));
+
+        existing.setExpiryDate(busPass.getExpiryDate());
+        existing.setPickUp(busPass.getPickUp());
+        existing.setStatus(busPass.getStatus());
+        existing.setBus(busPass.getBus());
+
+        return busPassRepository.save(existing);
+    }
+
+    public void deleteBusPass(Long passId) {
+        busPassRepository.deleteById(passId);
+    }
+}

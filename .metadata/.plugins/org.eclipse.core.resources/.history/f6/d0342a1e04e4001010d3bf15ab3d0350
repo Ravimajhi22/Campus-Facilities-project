@@ -1,0 +1,74 @@
+package com.campusFacilities.www.controller;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.campusFacilities.www.model.Transport.Bus;
+import com.campusFacilities.www.model.Transport.BusPass;
+import com.campusFacilities.www.model.Transport.RouteWay;
+import com.campusFacilities.www.service.Imp.TransportService;
+
+
+@RestController
+@RequestMapping("/transport")
+public class TransportController {
+
+    @Autowired
+    private TransportService transportService;
+
+  // Bus system
+    
+    //Add bus
+    @PostMapping("/bus")
+    public ResponseEntity<Bus> addBus(@RequestBody Bus bus) {
+        return ResponseEntity.ok(transportService.addBus(bus));
+    }
+   
+    //Get All Buses
+    @GetMapping("/buses")
+    public ResponseEntity<List<Bus>> getAllBuses() {
+        return ResponseEntity.ok(transportService.getAllBuses());
+    }
+  
+   
+    // BusPasses
+    
+    @PostMapping("/buspass")
+    public ResponseEntity<BusPass> addBusPass(@RequestBody BusPass busPass) {
+        return ResponseEntity.ok(transportService.addBusPass(busPass));
+    }
+    
+    @PutMapping("/buspass/{passId}")
+    public ResponseEntity<BusPass> updateBusPass(
+            @PathVariable Long passId,
+            @RequestBody BusPass busPass) {
+        return ResponseEntity.ok(transportService.updateBusPass(passId, busPass));
+    }
+
+    // Delete Bus Pass
+    @DeleteMapping("/buspass/{passId}")
+    public ResponseEntity<String> deleteBusPass(@PathVariable Long passId) {
+        transportService.deleteBusPass(passId);
+        return ResponseEntity.ok("Bus pass deleted successfully");
+    }
+
+    
+    @PostMapping("/route")
+    public ResponseEntity<RouteWay> addRouteWay(@RequestBody RouteWay routeWay) {
+        return ResponseEntity.ok(transportService.addRouteWay(routeWay));
+    }
+
+    @GetMapping("/routes")
+    public ResponseEntity<List<RouteWay>> getAllRoutes() {
+        return ResponseEntity.ok(transportService.getAllRoutes());
+    }
+}

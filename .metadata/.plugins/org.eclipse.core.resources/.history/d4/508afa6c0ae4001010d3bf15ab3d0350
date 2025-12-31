@@ -1,0 +1,8 @@
+package com.campusFacilities.www.model.Library;
+
+
+
+public enum BookStatus {
+    available,
+    not_available
+}

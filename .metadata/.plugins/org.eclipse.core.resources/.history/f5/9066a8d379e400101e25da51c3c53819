@@ -1,0 +1,16 @@
+package com.campusFacilities.www.service.Imp;
+import java.util.List;
+import com.campusFacilities.www.model.Library.IssueRecord;
+
+	public interface IssueRecordService {
+
+	    IssueRecord issueBook(IssueRecord issueRecord);
+
+	    List<IssueRecord> getAllIssues();
+
+	    IssueRecord getIssueById(Long id);
+
+	    IssueRecord returnBook(Long id);
+	}
+
+

@@ -1,0 +1,19 @@
+package com.campusFacilities.www.repository.Library;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.campusFacilities.www.model.Library.BookCategory;
+import com.campusFacilities.www.model.Library.BookIssueRecord;
+import com.campusFacilities.www.model.Library.BookReservation;
+import com.campusFacilities.www.model.Library.Books;
+import com.campusFacilities.www.model.Library.LibraryFine;
+import com.campusFacilities.www.model.Library.LibraryMember;
+import com.campusFacilities.www.model.Library.LibrarySettings;
+
+public interface BookCategoryRepository extends JpaRepository<BookCategory, Long> {}
+public interface BooksRepository extends JpaRepository<Books, Long> {}
+public interface LibraryMemberRepository extends JpaRepository<LibraryMember, Long> {}
+public interface BookIssueRecordRepository extends JpaRepository<BookIssueRecord, Long> {}
+public interface BookReservationRepository extends JpaRepository<BookReservation, Long> {}
+public interface LibraryFineRepository extends JpaRepository<LibraryFine, Long> {}
+public interface LibrarySettingsRepository extends JpaRepository<LibrarySettings, Long> {}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="jakarta.persistence.CascadeType"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Transport.Bus"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Transport.BusPass"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.BookStatus"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.Books"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Transport.BusRouteMapping"/>
+    <fullyQualifiedTypeName name="java.util.Optional"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.BookIssueRecord.Status"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.Books.Status"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+</qualifiedTypeNameHistroy>

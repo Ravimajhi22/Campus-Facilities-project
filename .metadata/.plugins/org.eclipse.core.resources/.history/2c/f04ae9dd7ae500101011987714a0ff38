@@ -1,0 +1,22 @@
+package com.campusFacilities.www.model.Library;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "library_settings")
+public class LibrarySettings {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long settingId;
+
+    private Integer maxBooksStudent = 3;
+    private Integer maxBooksStaff = 5;
+    private Integer maxIssueDays = 14;
+    private Double finePerDay = 2.0;
+
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    // Getters and Setters
+}

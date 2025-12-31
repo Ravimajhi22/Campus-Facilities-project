@@ -1,0 +1,19 @@
+package com.campusFacilities.www.model.Transport;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+@Entity
+@Table(name="RouteWay")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RouteWay 
+{
+private String routeName;
+private String startPoint;
+private String endPoint;	
+}

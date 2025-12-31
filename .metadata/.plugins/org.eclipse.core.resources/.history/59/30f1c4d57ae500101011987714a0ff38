@@ -1,0 +1,32 @@
+package com.campusFacilities.www.model.Library;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "library_members")
+public class LibraryMember {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long memberId;
+
+    private Long userId;
+
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType;
+
+    private Integer maxBooksAllowed = 3;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    private Boolean isDeleted = false;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public enum MemberType { STUDENT, STAFF }
+    public enum Status { ACTIVE, BLOCKED }
+
+    // Getters and Setters
+}

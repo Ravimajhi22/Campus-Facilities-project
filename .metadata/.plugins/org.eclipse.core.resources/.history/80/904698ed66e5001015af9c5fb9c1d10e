@@ -1,0 +1,11 @@
+package com.campusFacilities.www.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.campusFacilities.www.model.Transport.BusRouteMapping.BusRoute;
+
+public interface BusRouteMappingRepository extends JpaRepository<BusRoute, Long> 
+{
+
+}
+

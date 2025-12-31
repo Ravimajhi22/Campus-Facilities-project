@@ -1,0 +1,33 @@
+package com.campusFacilities.www.model.Library;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "book_reservations")
+public class BookReservation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long reservationId;
+
+    @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false)
+    private Books book;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private LibraryMember member;
+
+    private LocalDate reservationDate;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public enum Status { ACTIVE, CANCELLED, FULFILLED }
+
+    // Getters and Setters
+}

@@ -1,0 +1,48 @@
+package com.campusFacilities.www.model.Library;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "books")
+public class Books {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long bookId;
+
+    @Column(nullable = false)
+    private String title;
+
+    private String author;
+
+    @Column(unique = true)
+    private String isbn;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private BookCategory category;
+
+    private String publisher;
+
+    private String edition;
+
+    private Integer totalCopies = 1;
+
+    private Integer availableCopies = 1;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.AVAILABLE;
+
+    private Boolean isDeleted = false;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    public enum Status {
+        AVAILABLE, NOT_AVAILABLE
+    }
+
+    // Getters and Setters
+}

@@ -1,0 +1,7 @@
+package com.campusFacilities.www.repository.Library;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.campusFacilities.www.model.Library.LibraryFine;
+
+public interface LibraryFineRepository extends JpaRepository<LibraryFine, Long> {}

@@ -1,0 +1,28 @@
+package com.campusFacilities.www.model.Library;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "library_fines")
+public class LibraryFine {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long fineId;
+
+    @OneToOne
+    @JoinColumn(name = "issue_id", nullable = false)
+    private BookIssueRecord issueRecord;
+
+    private Double fineAmount;
+
+    @Enumerated(EnumType.STRING)
+    private Status paidStatus = Status.UNPAID;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public enum Status { PAID, UNPAID }
+
+    // Getters and Setters
+}

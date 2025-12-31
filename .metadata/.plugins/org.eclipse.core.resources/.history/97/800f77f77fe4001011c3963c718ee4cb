@@ -1,0 +1,49 @@
+package com.campusFacilities.www.controller;
+
+import java.awt.print.Book;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.campusFacilities.www.model.Library.IssueRecord;
+import com.campusFacilities.www.service.LibraryService;
+
+@RestController
+@RequestMapping("/api/library")
+public class LibraryController {
+
+    @Autowired
+    private LibraryService libraryService;
+
+    @PostMapping("/book")
+    public Book addBook(@RequestBody Book book) {
+        return libraryService.addBook(book);
+    }
+
+    @GetMapping("/books")
+    public List<Book> getAllBooks() {
+        return libraryService.getAllBooks();
+    }
+
+    @PostMapping("/issue")
+    public IssueRecord issueBook(@RequestBody IssueRecord issueRecord) {
+        return libraryService.issueBook(issueRecord);
+    }
+
+    @PutMapping("/return/{id}")
+    public IssueRecord returnBook(@PathVariable Long id) {
+        return libraryService.returnBook(id);
+    }
+
+    @GetMapping("/issues")
+    public List<IssueRecord> getAllIssues() {
+        return libraryService.getAllIssuedBooks();
+    }
+}

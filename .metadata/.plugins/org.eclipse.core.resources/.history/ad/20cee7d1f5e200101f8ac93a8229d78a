@@ -1,0 +1,18 @@
+package com.campusFacilities.www.service.Imp;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TransportService {
+	
+	@Autowired
+	Transport Repository TransportRepository;
+	
+	
+	public Transport addBusId(BusId busId)
+	{
+		
+}
+
+}
