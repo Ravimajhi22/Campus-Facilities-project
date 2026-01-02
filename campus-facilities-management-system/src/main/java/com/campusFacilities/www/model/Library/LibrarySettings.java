@@ -17,13 +17,12 @@ public class LibrarySettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long settingId;
-
     private Integer maxBooksStudent = 3;
     private Integer maxBooksStaff = 5;
     private Integer maxIssueDays = 14;
     private Double finePerDay = 2.0;
-
+    private Boolean isDeleted = false;   
     private LocalDateTime updatedAt = LocalDateTime.now();
+   
 
-    // Getters and Setters
 }

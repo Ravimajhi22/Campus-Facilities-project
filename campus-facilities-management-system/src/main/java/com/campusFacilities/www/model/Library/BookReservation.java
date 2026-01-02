@@ -32,7 +32,9 @@ public class BookReservation {
     private LibraryMember member;
 
     private LocalDate reservationDate;
-
+  
+    private Boolean isDeleted = false;
+    
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVE;
 
@@ -40,5 +42,5 @@ public class BookReservation {
 
     public enum Status { ACTIVE, CANCELLED, FULFILLED }
 
-    // Getters and Setters
+   
 }

@@ -3,6 +3,8 @@ package com.campusFacilities.www.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,15 +12,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.campusFacilities.www.model.Library.BookCategory;
 import com.campusFacilities.www.model.Library.BookIssueRecord;
 import com.campusFacilities.www.model.Library.BookReservation;
 import com.campusFacilities.www.model.Library.Books;
 import com.campusFacilities.www.model.Library.LibraryFine;
+import com.campusFacilities.www.model.Library.LibraryMember;
 import com.campusFacilities.www.model.Library.LibrarySettings;
 import com.campusFacilities.www.service.Imp.LibraryServiceImpl;
+
+import lombok.Data;
 
 @RestController
 @RequestMapping("/library")
@@ -73,17 +78,21 @@ public class LibraryController {
     }
    
     // ====== ISSUE RECORDS ======
+    
     @PostMapping("/issue")
-    public BookIssueRecord issueBook(
-            @RequestParam Long bookId,
-            @RequestParam Long memberId) {
-
-        return libraryService.issueBook(bookId, memberId);
+    public BookIssueRecord issueBook(@RequestBody IssueRequest request) {
+        return libraryService.issueBook(request.getBookId(), request.getMemberId());
+    }
+ 
+    @Data
+    public static class IssueRequest {
+        private Long bookId;
+        private Long memberId;
     }
 
     @GetMapping("/issues")
-    public List<BookIssueRecord> getAllIssuedBooks() {
-        return libraryService.getAllIssuedBooks();
+    public List<Books> getAllIssuedBooks() {
+        return libraryService.getAllBooks();
     }
     @PutMapping("/return/{id}")
     public BookIssueRecord returnBook(@PathVariable Long id) {
@@ -103,7 +112,7 @@ public class LibraryController {
         return libraryService.addReservation(reservation);
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/reservationses")
     public List<BookReservation> getAllReservations() {
         return libraryService.getAllReservations();
     }
@@ -141,6 +150,44 @@ public class LibraryController {
         return "Fine deleted successfully!";
     }
 
+    //========Members========
+    
+    // CREATE a new library member
+    @PostMapping("/member")
+    public ResponseEntity<LibraryMember> createMember(@RequestBody LibraryMember member) {
+        LibraryMember createdMember = libraryService.addMember(member);
+        return new ResponseEntity<>(createdMember, HttpStatus.CREATED);
+    }
+
+    // GET all library members
+    @GetMapping("/members")
+    public ResponseEntity<List<LibraryMember>> getAllMembers() {
+        List<LibraryMember> members = libraryService.getAllMembers();
+        return ResponseEntity.ok(members);
+    }
+
+    // GET a single member by ID
+    @GetMapping("/members/{id}")
+    public ResponseEntity<LibraryMember> getMemberById(@PathVariable Long id) {
+        LibraryMember member = libraryService.getMemberById(id);
+        return ResponseEntity.ok(member);
+    }
+
+    // UPDATE an existing member
+    @PutMapping("/members/{id}")
+    public ResponseEntity<LibraryMember> updateMember(
+            @PathVariable Long id,
+            @RequestBody LibraryMember member) {
+        LibraryMember updatedMember = libraryService.updateMember(id, member);
+        return ResponseEntity.ok(updatedMember);
+    }
+
+    // DELETE a member
+    @DeleteMapping("/members/{id}")
+    public ResponseEntity<String> deleteMember(@PathVariable Long id) {
+        libraryService.deleteMember(id);
+        return ResponseEntity.ok("Library member deleted successfully");
+    }
     // ====== SETTINGS ======
     @PostMapping("/settings")
     public LibrarySettings addSettings(@RequestBody LibrarySettings settings) {

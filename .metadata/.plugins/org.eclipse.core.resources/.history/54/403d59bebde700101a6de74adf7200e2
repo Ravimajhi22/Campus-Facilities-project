@@ -1,0 +1,149 @@
+package com.campusFacilities.www.service.Imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.campusFacilities.www.model.Hostel.Hostel;
+import com.campusFacilities.www.model.Hostel.HostelAllocation;
+import com.campusFacilities.www.model.Hostel.HostelBlockRoom;
+import com.campusFacilities.www.repository.Hostel.HostelBlockRepository;
+import com.campusFacilities.www.repository.Hostel.HostelComplaintRepository;
+import com.campusFacilities.www.repository.Hostel.HostelFeeRepository;
+import com.campusFacilities.www.repository.Hostel.HostelRepository;
+import com.campusFacilities.www.repository.Hostel.HostelRoomRepository;
+
+@Service
+public class HostelServiceImpl {
+	
+	@Autowired
+    private HostelRoomRepository hostelroomRepository;
+
+    @Autowired
+    private HostelRepository hostelRepository;
+
+    @Autowired
+    private HostelBlockRepository blockRoomRepository;
+    
+    @Autowired
+    private HostelComplaintRepository complaintRepository;
+
+    @Autowired
+    private HostelFeeRepository feeRepository;
+    
+    
+    
+    @Autowired
+    private HostelComplaintRepository allocationRepository;
+    
+    
+    
+
+    // ================= HOSTEL =================
+
+    public Hostel addHostel(Hostel hostel) {
+        hostel.setIsDeleted(false);
+        return hostelRepository.save(hostel);
+    }
+
+    public List<Hostel> getAllHostels() {
+        return hostelRepository.findByIsDeletedFalse();
+    }
+
+    public Hostel updateHostel(Long hostelId, Hostel updatedHostel) {
+        Hostel existing = hostelRepository.findById(hostelId)
+                .orElseThrow(() -> new RuntimeException("Hostel not found with id: " + hostelId));
+
+        existing.setHostelName(updatedHostel.getHostelName());
+        existing.setHostelType(updatedHostel.getHostelType());
+        existing.setStatus(updatedHostel.getStatus());
+
+        return hostelRepository.save(existing);
+    }
+
+    public void deleteHostel(Long hostelId) {
+        Hostel hostel = hostelRepository.findById(hostelId)
+                .orElseThrow(() -> new RuntimeException("Hostel not found with id: " + hostelId));
+
+        hostel.setIsDeleted(true);
+        hostelRepository.save(hostel);
+    }
+
+    // ================= BLOCK + ROOM =================
+
+    public HostelBlockRoom addBlockRoom(HostelBlockRoom blockRoom) {
+        blockRoom.setIsDeleted(false);
+        blockRoom.setOccupiedCount(0);
+        blockRoom.setStatus(HostelBlockRoom.Status.AVAILABLE);
+        return blockRoomRepository.save(blockRoom);
+    }
+
+    public List<HostelBlockRoom> getAllBlockRooms() {
+        return blockRoomRepository.findByIsDeletedFalse();
+    }
+
+    public HostelBlockRoom updateBlockRoom(Long id, HostelBlockRoom updated) {
+        HostelBlockRoom existing = blockRoomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Block/Room not found with id: " + id));
+
+        existing.setBlockName(updated.getBlockName());
+        existing.setFloorNumber(updated.getFloorNumber());
+        existing.setRoomNumber(updated.getRoomNumber());
+        existing.setRoomType(updated.getRoomType());
+        existing.setCapacity(updated.getCapacity());
+
+        return blockRoomRepository.save(existing);
+    }
+
+    public void deleteBlockRoom(Long id) {
+        HostelBlockRoom blockRoom = blockRoomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Block/Room not found with id: " + id));
+
+        blockRoom.setIsDeleted(true);
+        blockRoomRepository.save(blockRoom);
+    }
+
+    // ================= STUDENT ALLOCATION =================
+
+    public HostelAllocation allocateStudent(HostelAllocation allocation) {
+
+        HostelBlockRoom room = blockRoomRepository.findById(allocation.getBlockRoom().getId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        if (room.getOccupiedCount() >= room.getCapacity()) {
+            throw new RuntimeException("Room is already full");
+        }
+
+        room.setOccupiedCount(room.getOccupiedCount() + 1);
+        if (room.getOccupiedCount().equals(room.getCapacity())) {
+            room.setStatus(HostelBlockRoom.Status.FULL);
+        }
+
+        blockRoomRepository.save(room);
+
+        allocation.setIsDeleted(false);
+        allocation.setStatus(HostelAllocation.Status.ALLOCATED);
+        return allocationRepository.save(allocation);
+    }
+
+    public List<HostelAllocation> getAllAllocations() {
+        return allocationRepository.findByIsDeletedFalse();
+    }
+
+    public void deallocateStudent(Long allocationId) {
+
+        HostelAllocation allocation = allocationRepository.findById(allocationId)
+                .orElseThrow(() -> new RuntimeException("Allocation not found"));
+
+        HostelBlockRoom room = allocation.getBlockRoom();
+        room.setOccupiedCount(room.getOccupiedCount() - 1);
+        room.setStatus(HostelBlockRoom.Status.AVAILABLE);
+
+        blockRoomRepository.save(room);
+
+        allocation.setIsDeleted(true);
+        allocation.setStatus(HostelAllocation.Status.DEALLOCATED);
+        allocationRepository.save(allocation);
+    }
+}

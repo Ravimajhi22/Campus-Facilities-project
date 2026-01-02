@@ -7,8 +7,12 @@
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.Books"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Transport.BusRouteMapping"/>
     <fullyQualifiedTypeName name="java.util.Optional"/>
-    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.BookIssueRecord.Status"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.Books.Status"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.repository.Hostel.HostelRepository"/>
+    <fullyQualifiedTypeName name="org.apache.catalina.realm.JNDIRealm.User"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
+    <fullyQualifiedTypeName name="java.security.Timestamp"/>
     <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Hostel.HostelRoom.RoomStatus"/>
 </qualifiedTypeNameHistroy>

@@ -1,4 +1,5 @@
 package com.campusFacilities.www.service.Imp;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -7,21 +8,26 @@ import org.springframework.stereotype.Service;
 
 import com.campusFacilities.www.model.Library.BookCategory;
 import com.campusFacilities.www.model.Library.BookIssueRecord;
+import com.campusFacilities.www.model.Library.BookReservation;
 import com.campusFacilities.www.model.Library.Books;
+import com.campusFacilities.www.model.Library.LibraryFine;
 import com.campusFacilities.www.model.Library.LibraryMember;
+import com.campusFacilities.www.model.Library.LibrarySettings;
+
 import com.campusFacilities.www.repository.Library.BookCategoryRepository;
 import com.campusFacilities.www.repository.Library.BookIssueRecordRepository;
 import com.campusFacilities.www.repository.Library.BookReservationRepository;
 import com.campusFacilities.www.repository.Library.BooksRepository;
+import com.campusFacilities.www.repository.Library.LibraryFineRepository;
 import com.campusFacilities.www.repository.Library.LibraryMemberRepository;
+import com.campusFacilities.www.repository.Library.LibrarySettingsRepository;
 
 @Service
 public class LibraryServiceImpl {
 
-	
     @Autowired
     private BooksRepository booksRepository;
-    
+
     @Autowired
     private BookCategoryRepository bookCategoryRepository;
 
@@ -34,24 +40,29 @@ public class LibraryServiceImpl {
     @Autowired
     private BookReservationRepository bookReservationRepository;
 
+    @Autowired
+    private LibraryFineRepository libraryFineRepository;
+
+    @Autowired
+    private LibrarySettingsRepository librarySettingsRepository;
+
     // ================= BOOK =================
 
-    // Add new book
     public Books addBook(Books book) {
         book.setAvailableCopies(book.getTotalCopies());
         book.setStatus(Books.Status.AVAILABLE);
         return booksRepository.save(book);
     }
 
-    // Get all books
     public List<Books> getAllBooks() {
         return booksRepository.findAll();
     }
-    
-    //Update Books
+
     public Books updateBook(Long bookId, Books updatedBook) {
-              Books existingBook = booksRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+
+        Books existingBook = booksRepository.findById(bookId)
+                .orElseThrow(() ->
+                        new RuntimeException("Book not found with id: " + bookId));
 
         existingBook.setTitle(updatedBook.getTitle());
         existingBook.setAuthor(updatedBook.getAuthor());
@@ -65,55 +76,51 @@ public class LibraryServiceImpl {
         return booksRepository.save(existingBook);
     }
 
-        // DELETE BOOK
-        public void deleteBook(Long bookId) {
+    public void deleteBook(Long bookId) {
 
-            Books book = booksRepository.findById(bookId)
-                    .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+        Books book = booksRepository.findById(bookId)
+                .orElseThrow(() ->
+                        new RuntimeException("Book not found with id: " + bookId));
 
-            booksRepository.delete(book);
-        }
-        //==================BooksCategory====================//
-   
-        public BookCategory addCategory(BookCategory category) {
-            category.setIsDeleted(false);
-            return bookCategoryRepository.save(category); 
-        }
+        booksRepository.delete(book);
+    }
 
+    // ================= BOOK CATEGORY =================
 
-        // Get All Categories 
-        
-        public List<BookCategory> getAllCategories() {
-            return bookCategoryRepository.findByIsDeletedFalse();
-        }
+    public BookCategory addCategory(BookCategory category) {
+        category.setIsDeleted(false);
+        return bookCategoryRepository.save(category);
+    }
 
-        // Update Category
-        public BookCategory updateCategory(Long id, BookCategory updatedCategory) {
+    public List<BookCategory> getAllCategories() {
+        return bookCategoryRepository.findByIsDeletedFalse();
+    }
 
-            BookCategory existing = bookCategoryRepository.findById(id)
-                    .orElseThrow(() -> 
-                        new RuntimeException("Category not found with id: " + id)
-                    );
+    public BookCategory updateCategory(Long id, BookCategory updatedCategory) {
 
-            existing.setCategoryName(updatedCategory.getCategoryName());
-            existing.setDescription(updatedCategory.getDescription());
-            existing.setStatus(updatedCategory.getStatus());
+        BookCategory existing = bookCategoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Category not found with id: " + id));
 
-            return bookCategoryRepository.save(existing);
-        }
+        existing.setCategoryName(updatedCategory.getCategoryName());
+        existing.setDescription(updatedCategory.getDescription());
+        existing.setStatus(updatedCategory.getStatus());
 
-        //  Delete Category
-        public void deleteCategory(Long id) {
+        return bookCategoryRepository.save(existing);
+    }
 
-            BookCategory category = bookCategoryRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+    public void deleteCategory(Long id) {
 
-            category.setIsDeleted(true);
-            bookCategoryRepository.save(category);
-        }
-    // ================= ISSUEBOOK =================
+        BookCategory category = bookCategoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Category not found with id: " + id));
 
-    // Issue book
+        category.setIsDeleted(true);
+        bookCategoryRepository.save(category);
+    }
+
+    // ================= ISSUE BOOK =================
+
     public BookIssueRecord issueBook(Long bookId, Long memberId) {
 
         Books book = booksRepository.findById(bookId)
@@ -126,11 +133,9 @@ public class LibraryServiceImpl {
         LibraryMember member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
-        // update book stock
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         booksRepository.save(book);
 
-        // create issue record
         BookIssueRecord issue = new BookIssueRecord();
         issue.setBook(book);
         issue.setMember(member);
@@ -140,30 +145,29 @@ public class LibraryServiceImpl {
 
         return issueRepository.save(issue);
     }
-    
+
     public void deleteIssueRecord(Long id) {
-        BookIssueRecord record = issueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Issue record not found with id: " + id));
-    }     
-    
-   //==================BooksReservation===============//
-    
-    // Add Reservation
-    public BookReservation addReservation(BookReservation reservation)
-    {
-        reservation.setIsDeleted(false); 
+        issueRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue record not found with id: " + id));
+    }
+
+    // ================= BOOK RESERVATION =================
+
+    public BookReservation addReservation(BookReservation reservation) {
+        reservation.setIsDeleted(false);
         return bookReservationRepository.save(reservation);
     }
 
-    // Get All Reservations (excluding deleted)
     public List<BookReservation> getAllReservations() {
         return bookReservationRepository.findByIsDeletedFalse();
     }
 
-    // Update Reservation
     public BookReservation updateReservation(Long id, BookReservation updatedReservation) {
+
         BookReservation existing = bookReservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+                .orElseThrow(() ->
+                        new RuntimeException("Reservation not found with id: " + id));
 
         existing.setBook(updatedReservation.getBook());
         existing.setMember(updatedReservation.getMember());
@@ -173,18 +177,51 @@ public class LibraryServiceImpl {
         return bookReservationRepository.save(existing);
     }
 
-    // Delete Reservation (soft delete)
     public void deleteReservation(Long id) {
+
         BookReservation reservation = bookReservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+                .orElseThrow(() ->
+                        new RuntimeException("Reservation not found with id: " + id));
 
         reservation.setIsDeleted(true);
         bookReservationRepository.save(reservation);
     }
-}
-    // ================= RETURN =================
 
-    // Return book
+    // ================= FINES =================
+
+    public LibraryFine addFine(LibraryFine fine) {
+        fine.setIsDeleted(false);
+        return libraryFineRepository.save(fine);
+    }
+
+    public List<LibraryFine> getAllFines() {
+        return libraryFineRepository.findByIsDeletedFalse();
+    }
+
+    public LibraryFine updateFine(Long id, LibraryFine updatedFine) {
+
+        LibraryFine existing = libraryFineRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Fine not found with id: " + id));
+
+        existing.setFineAmount(updatedFine.getFineAmount());
+        existing.setPaidStatus(updatedFine.getPaidStatus());
+
+        return libraryFineRepository.save(existing);
+    }
+
+    public void deleteFine(Long id) {
+
+        LibraryFine fine = libraryFineRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Fine not found with id: " + id));
+
+        fine.setIsDeleted(true);
+        libraryFineRepository.save(fine);
+    }
+
+    // ================= RETURN BOOK =================
+
     public BookIssueRecord returnBook(Long issueId) {
 
         BookIssueRecord issue = issueRepository.findById(issueId)
@@ -193,7 +230,6 @@ public class LibraryServiceImpl {
         issue.setReturnDate(LocalDate.now());
         issue.setStatus(BookIssueRecord.Status.RETURNED);
 
-        // update book stock
         Books book = issue.getBook();
         book.setAvailableCopies(book.getAvailableCopies() + 1);
         booksRepository.save(book);
@@ -201,10 +237,70 @@ public class LibraryServiceImpl {
         return issueRepository.save(issue);
     }
 
-    // ================= REPORT =================
+    // ================= MEMBERS =================
 
-    // Get all issued books
-    public List<BookIssueRecord> getAllIssuedBooks() {
-        return issueRepository.findAll();
+    public LibraryMember addMember(LibraryMember member) {
+        member.setIsDeleted(false);
+        return memberRepository.save(member);
+    }
+
+    public List<LibraryMember> getAllMembers() {
+        return memberRepository.findByIsDeletedFalse();
+    }
+
+    public LibraryMember getMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .filter(m -> !m.getIsDeleted())
+                .orElseThrow(() ->
+                        new RuntimeException("Member not found with id: " + memberId));
+    }
+
+    public LibraryMember updateMember(Long memberId, LibraryMember updatedMember) {
+
+        LibraryMember existing = getMemberById(memberId);
+
+        existing.setUserId(updatedMember.getUserId());
+        existing.setMemberType(updatedMember.getMemberType());
+        existing.setMaxBooksAllowed(updatedMember.getMaxBooksAllowed());
+        existing.setStatus(updatedMember.getStatus());
+
+        return memberRepository.save(existing);
+    }
+
+    public void deleteMember(Long memberId) {
+
+        LibraryMember member = getMemberById(memberId);
+        member.setIsDeleted(true);
+        memberRepository.save(member);
+    }
+
+    // ================= SETTINGS =================
+
+    public LibrarySettings addSettings(LibrarySettings settings) {
+        settings.setIsDeleted(false);
+        return librarySettingsRepository.save(settings);
+    }
+
+    public List<LibrarySettings> getAllSettings() {
+        return librarySettingsRepository.findByIsDeletedFalse();
+    }
+
+    public LibrarySettings updateSettings(Long id, LibrarySettings updatedSettings) {
+
+        LibrarySettings existing = librarySettingsRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Settings not found with id: " + id));
+
+        return librarySettingsRepository.save(existing);
+    }
+
+    public void deleteSettings(Long id) {
+
+        LibrarySettings settings = librarySettingsRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Settings not found with id: " + id));
+
+        settings.setIsDeleted(true);
+        librarySettingsRepository.save(settings);
     }
 }

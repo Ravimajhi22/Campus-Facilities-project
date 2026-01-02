@@ -34,6 +34,8 @@ public class LibraryFine {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum Status { PAID, UNPAID }
+    
+    private Boolean isDeleted = false;
 
-    // Getters and Setters
+  
 }

@@ -1,7 +1,5 @@
 package com.campusFacilities.www.model.Library;
-
 import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,5 +35,4 @@ public class LibraryMember {
     public enum MemberType { STUDENT, STAFF }
     public enum Status { ACTIVE, BLOCKED }
 
-    // Getters and Setters
 }

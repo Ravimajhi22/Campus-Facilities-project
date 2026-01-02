@@ -2,6 +2,8 @@ package com.campusFacilities.www.model.Library;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,7 +23,6 @@ public class Books {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-   
     private Long bookId;
 
     @Column(nullable = false)
@@ -52,10 +53,21 @@ public class Books {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();
-
+  
     public enum Status {
-        AVAILABLE, NOT_AVAILABLE
-    }
+        AVAILABLE,
+        NOT_AVAILABLE;
 
-    // Getters and Setters
+        @JsonCreator
+        public static Status from(String value) {
+            if (value == null) {
+                return null; 
+            }
+            try {
+                return Status.valueOf(value.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid status value: " + value);
+            }
+        }
+}
 }
