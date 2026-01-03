@@ -1,10 +1,12 @@
 package com.campusFacilities.www.controller;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +21,8 @@ import com.campusFacilities.www.model.Transport.RouteWay;
 import com.campusFacilities.www.model.Transport.Stop;
 import com.campusFacilities.www.service.Imp.TransportService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/transport")
 public class TransportController {
@@ -27,12 +31,22 @@ public class TransportController {
     private TransportService transportService;
 
 
-    // ================= BUS =================
+    // ================= BUS =================//
 
     @PostMapping("/bus")
-    public ResponseEntity<Bus> addBus(@RequestBody Bus bus) {
+    public ResponseEntity<?> addBus(HttpServletRequest request,
+                                    @RequestBody Bus bus) {
+
+        List<String> permissions =
+                (List<String>) request.getAttribute("permissions");
+
+        if (!permissions.contains("BUS_CREATE")) {
+            return ResponseEntity.status(403).body("Access Denied");
+        }
+
         return ResponseEntity.ok(transportService.addBus(bus));
     }
+
 
     @GetMapping("/buses")
     public ResponseEntity<List<Bus>> getAllBuses() {
@@ -49,8 +63,20 @@ public class TransportController {
         transportService.deleteBus(busId);
         return ResponseEntity.ok("Bus deleted successfully");
     }
+    @PatchMapping("/bus/{busId}")
+    public ResponseEntity<Bus> patchBus(@PathVariable Long busId, @RequestBody Map<String,Object> updates) {
+        Bus bus = new Bus();
+        if(updates.containsKey("busNumber")) bus.setBusNumber((String) updates.get("busNumber"));
+        if(updates.containsKey("driverName")) bus.setDriverName((String) updates.get("driverName"));
+        if(updates.containsKey("driverContact")) bus.setDriverContact((String) updates.get("driverContact"));
+        if(updates.containsKey("capacity")) bus.setCapacity((Integer) updates.get("capacity"));
 
-    // ================= ROUTE =================
+        return ResponseEntity.ok(transportService.patchBus(busId, bus));
+    }
+
+
+
+    // ================= ROUTE =================//
 
     @PostMapping("/route")
     public ResponseEntity<RouteWay> addRoute(@RequestBody RouteWay routeWay) {
@@ -74,8 +100,24 @@ public class TransportController {
         transportService.deleteRoute(routeId);
         return ResponseEntity.ok("Route deleted successfully");
     }
+    @PatchMapping("/route/{routeId}")
+    public ResponseEntity<RouteWay> patchRoute(
+            @PathVariable Long routeId,
+            @RequestBody Map<String, Object> updates) {
 
-    // ================= STOP =================
+        RouteWay route = new RouteWay();
+
+        if (updates.containsKey("routeName"))
+            route.setRouteName((String) updates.get("routeName"));
+
+        if (updates.containsKey("description"))
+            route.setDescription((String) updates.get("description"));
+
+        return ResponseEntity.ok(transportService.patchRoute(routeId, route));
+    }
+
+
+    // ================= STOP =================//
 
     @PostMapping("/stop")
     public ResponseEntity<Stop> addStop(@RequestBody Stop stop) {
@@ -98,6 +140,19 @@ public class TransportController {
     public ResponseEntity<String> deleteStop(@PathVariable Long stopId) {
         transportService.deleteStop(stopId);
         return ResponseEntity.ok("Stop deleted successfully");
+    }
+    @PatchMapping("/stop/{stopId}")
+    public ResponseEntity<Stop> patchStop(
+            @PathVariable Long stopId,
+            @RequestBody Map<String, Object> updates) {
+
+        Stop stop = new Stop();
+
+        if (updates.containsKey("stopName"))
+            stop.setStopName((String) updates.get("stopName"));
+
+        
+        return ResponseEntity.ok(transportService.patchStop(stopId, stop));
     }
 
     // ================= BUS PASS =================
@@ -124,6 +179,16 @@ public class TransportController {
         transportService.deleteBusPass(passId);
         return ResponseEntity.ok("Bus pass deleted successfully");
     }
+    @PatchMapping("/buspass/{passId}")
+    public ResponseEntity<BusPass> patchBusPass(
+            @PathVariable Long passId,
+            @RequestBody Map<String, Object> updates) {
+
+        BusPass pass = new BusPass();
+
+        return ResponseEntity.ok(transportService.patchBusPass(passId, pass));
+    }
+
   //==================== BusRouteMapping ========================
 
     @PostMapping("/busroute")
@@ -158,5 +223,15 @@ public class TransportController {
     public ResponseEntity<List<BusRoute>> getByRouteId(@PathVariable Long routeId) {
         return ResponseEntity.ok(transportService.getByRouteId(routeId));
 }
+    @PatchMapping("/busroute/{id}")
+    public ResponseEntity<BusRoute> patchBusRoute(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        BusRoute busRoute = new BusRoute();
+
+    
+        return ResponseEntity.ok(transportService.patchBusRoute(id, busRoute));
+    }
 
 }

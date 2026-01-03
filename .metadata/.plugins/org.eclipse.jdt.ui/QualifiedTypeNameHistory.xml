@@ -10,9 +10,17 @@
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.BookIssueRecord.Status"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Library.Books.Status"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.repository.Hostel.HostelRepository"/>
-    <fullyQualifiedTypeName name="org.apache.catalina.realm.JNDIRealm.User"/>
-    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
     <fullyQualifiedTypeName name="java.security.Timestamp"/>
-    <fullyQualifiedTypeName name="java.util.List"/>
     <fullyQualifiedTypeName name="com.campusFacilities.www.model.Hostel.HostelRoom.RoomStatus"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.repository.DocumentRepository"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Documents.Document"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.repository.Documnets.DocumentRepository"/>
+    <fullyQualifiedTypeName name="org.apache.catalina.realm.JNDIRealm.User"/>
+    <fullyQualifiedTypeName name="org.apache.catalina.User"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Id"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.model.Documents.User"/>
+    <fullyQualifiedTypeName name="java.util.Map"/>
+    <fullyQualifiedTypeName name="com.campusFacilities.www.service.Imp.TransportService"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="io.jsonwebtoken.io.IOException"/>
 </qualifiedTypeNameHistroy>

@@ -1,0 +1,5 @@
+package com.campusFacilities.www.Config;
+
+public class SecurityConfig {
+
+}

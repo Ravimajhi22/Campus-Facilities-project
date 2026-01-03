@@ -28,5 +28,10 @@ public class RouteWay {
     @Column(name = "end_point", nullable = false)
     private String endPoint;
 
+	public void setDescription(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
     
 }

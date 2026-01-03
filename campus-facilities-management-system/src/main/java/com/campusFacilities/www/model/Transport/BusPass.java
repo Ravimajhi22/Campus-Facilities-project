@@ -1,5 +1,6 @@
 package com.campusFacilities.www.model.Transport;
 import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,5 +45,16 @@ public class BusPass {
     @ManyToOne
     @JoinColumn(name = "bus_id", nullable = false)
     private Bus bus;
+   
+   
+     public enum PassStatus {
+        ACTIVE,
+        EXPIRED,
+        CANCELLED
+    }
+        public void setStatus(PassStatus status) {
+            this.status = status;
+        }
+    }
 
-}
+

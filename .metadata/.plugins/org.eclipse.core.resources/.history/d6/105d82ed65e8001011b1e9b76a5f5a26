@@ -1,0 +1,3 @@
+package com.campusFacilities.www.repository.Documnets;
+
+public interface DocumentCategoryRepository extends JpaRepository<DocumentCategory, Long> {}
