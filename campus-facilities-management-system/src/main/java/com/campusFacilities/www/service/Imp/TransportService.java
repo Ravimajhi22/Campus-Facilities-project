@@ -1,90 +1,140 @@
 package com.campusFacilities.www.service.Imp;
-
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-
+import java.util.Map;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.campusFacilities.www.model.Transport.*;
-import com.campusFacilities.www.repository.*;
+import com.campusFacilities.www.Transport.util.QRCodeUtil;
+import com.campusFacilities.www.model.Transport.ConductorDetails;
+import com.campusFacilities.www.model.Transport.DriverDetails;
+import com.campusFacilities.www.model.Transport.RouteWay;
+import com.campusFacilities.www.model.Transport.TransportAttendance;
+import com.campusFacilities.www.model.Transport.Vehicle;
+import com.campusFacilities.www.model.Transport.VehicleGPS;
+import com.campusFacilities.www.repository.Transport.ConductorDetailsRepository;
+import com.campusFacilities.www.repository.Transport.DriverDetailsRepository;
+import com.campusFacilities.www.repository.Transport.RouteWayRepository;
+import com.campusFacilities.www.repository.Transport.TransportAttendanceRepository;
+import com.campusFacilities.www.repository.Transport.VehicleGPSRepository;
+import com.campusFacilities.www.repository.Transport.VehicleRepository;
 
 @Service
 public class TransportService {
 
     @Autowired
-    private BusRepository busRepository;
+    private VehicleRepository vehicleRepository;
+    
+    @Autowired
+    private RouteWayRepository routeWayRepository;    
+    
+    @Autowired
+    private  DriverDetailsRepository driverDetailsRepository;
+    
+    @Autowired
+    private ConductorDetailsRepository conductorRepository;
+    
+    @Autowired
+    private VehicleGPSRepository gpsRepository;
 
     @Autowired
-    private RouteWayRepository routeWayRepository;
+    private TransportAttendanceRepository attendanceRepository;
+    
+    /* ================= VEHICLE ===================== */
 
-    @Autowired
-    private StopRepository stopRepository;
+    public Vehicle addVehicle(Vehicle vehicle) {
 
-    @Autowired
-    private BusPassRepository busPassRepository;
+        if (vehicle == null) 
+        {
+            throw new IllegalArgumentException("Vehicle must not be null");
+        }
 
-    @Autowired
-    private BusRouteMappingRepository busRouteMappingRepository;
-
-    // ================= BUS =================
-
-    public Bus addBus(Bus bus) {
-        RouteWay route = routeWayRepository.findById(bus.getRoute().getRouteId())
-                .orElseThrow(() -> new RuntimeException("Route not found"));
-        bus.setRoute(route);
-        return busRepository.save(bus);
-    }
-
-    public List<Bus> getAllBuses() {
-        return busRepository.findAll();
-    }
-
-    public Bus updateBus(Long busId, Bus bus) {
-        Bus existing = busRepository.findById(busId)
-                .orElseThrow(() -> new RuntimeException("Bus not found"));
-
-        existing.setBusNumber(bus.getBusNumber());
-        existing.setDriverName(bus.getDriverName());
-        existing.setDriverContact(bus.getDriverContact());
-        existing.setCapacity(bus.getCapacity());
-        existing.setRoute(bus.getRoute());
-
-        return busRepository.save(existing);
-    }
-
-    public Bus patchBus(Long busId, Bus bus) {
-        Bus existing = busRepository.findById(busId)
-                .orElseThrow(() -> new RuntimeException("Bus not found"));
-
-        if (bus.getBusNumber() != null)
-            existing.setBusNumber(bus.getBusNumber());
-
-        if (bus.getDriverName() != null)
-            existing.setDriverName(bus.getDriverName());
-
-        if (bus.getDriverContact() != null)
-            existing.setDriverContact(bus.getDriverContact());
-
-        if (bus.getCapacity() != null)
-            existing.setCapacity(bus.getCapacity());
-
-        if (bus.getRoute() != null && bus.getRoute().getRouteId() != null) {
-            RouteWay route = routeWayRepository.findById(bus.getRoute().getRouteId())
+        if (vehicle.getRoute() != null && vehicle.getRoute().getRouteCode() != null) {
+            RouteWay route = routeWayRepository
+                    .findByRouteCode(vehicle.getRoute().getRouteCode())
                     .orElseThrow(() -> new RuntimeException("Route not found"));
+            vehicle.setRoute(route);
+        } else {
+            vehicle.setRoute(null);
+        }
+        if (vehicle.getOccupiedSeats() == null) {
+            vehicle.setOccupiedSeats(0);
+        }
+
+        vehicle.setVehicleStatus(
+                vehicle.getVehicleStatus() == null
+                        ? Vehicle.VehicleStatus.INACTIVE
+                        : vehicle.getVehicleStatus());
+
+        if (vehicle.getGpsEnabled() == null) {
+            vehicle.setGpsEnabled(false);
+        }
+
+        return vehicleRepository.save(vehicle);
+    }
+
+    
+    public List<Vehicle> getAllVehicles() {
+        return vehicleRepository.findAll();
+    }
+
+    public Vehicle getVehicleByNumber(String vehicleNumber) {
+        return vehicleRepository.findByVehicleNumber(vehicleNumber)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+    }
+
+    public Vehicle updateVehicle(String vehicleNumber, Vehicle vehicle) {
+
+        Vehicle existing = getVehicleByNumber(vehicleNumber);
+
+        existing.setVehicletype(vehicle.getVehicletype());
+        existing.setCapacity(vehicle.getCapacity());
+        existing.setOccupiedSeats(vehicle.getOccupiedSeats());
+        existing.setVehicleStatus(vehicle.getVehicleStatus());
+        existing.setGpsEnabled(vehicle.getGpsEnabled());
+
+        if (vehicle.getRoute() != null) {
+            RouteWay route = routeWayRepository
+                    .findByRouteCode(vehicle.getRoute().getRouteCode())
+                    .orElseThrow(() -> new RuntimeException("Route not found"));
+
             existing.setRoute(route);
         }
 
-        return busRepository.save(existing);
+
+        return vehicleRepository.save(existing);
     }
 
-    public void deleteBus(Long busId) {
-        busRepository.deleteById(busId);
+    public Vehicle patchVehicle(String vehicleNumber, Vehicle vehicle) {
+
+        Vehicle existing = getVehicleByNumber(vehicleNumber);
+
+        if (vehicle.getVehicletype() != null)
+            existing.setVehicletype(vehicle.getVehicletype());
+        if (vehicle.getCapacity() != null)
+            existing.setCapacity(vehicle.getCapacity());
+        if (vehicle.getOccupiedSeats() != null)
+            existing.setOccupiedSeats(vehicle.getOccupiedSeats());
+        if (vehicle.getVehicleStatus() != null)
+            existing.setVehicleStatus(vehicle.getVehicleStatus());
+        if (vehicle.getGpsEnabled() != null)
+            existing.setGpsEnabled(vehicle.getGpsEnabled());
+
+        return vehicleRepository.save(existing);
     }
 
-    // ================= ROUTE =================
+    
+	  public void deleteVehicle(String vehicleNumber) {
+	  vehicleRepository.delete(getVehicleByNumber(vehicleNumber)); 
+	  }
+	 
+     //================================ ROUTEWAY ======================================== //
 
     public RouteWay addRoute(RouteWay routeWay) {
+        if (routeWay.getActive() == null) {
+            routeWay.setActive(true);
+        }
         return routeWayRepository.save(routeWay);
     }
 
@@ -92,137 +142,295 @@ public class TransportService {
         return routeWayRepository.findAll();
     }
 
-    public RouteWay updateRoute(Long routeId, RouteWay routeWay) {
-        RouteWay existing = routeWayRepository.findById(routeId)
+    public List<RouteWay> getActiveRoutes() {
+        return routeWayRepository.findByActiveTrue();
+    }
+
+    public RouteWay getRouteByCode(Long routeCode) {
+        return routeWayRepository.findByRouteCode(routeCode)
                 .orElseThrow(() -> new RuntimeException("Route not found"));
+    }
+
+    public RouteWay updateRoute(Long routeCode, RouteWay routeWay) {
+
+        RouteWay existing = getRouteByCode(routeCode);
 
         existing.setRouteName(routeWay.getRouteName());
-        existing.setStartPoint(routeWay.getStartPoint());
-        existing.setEndPoint(routeWay.getEndPoint());
+        existing.setPickupPoints(routeWay.getPickupPoints());
+        existing.setDropPoints(routeWay.getDropPoints());
+        existing.setDistanceKm(routeWay.getDistanceKm());
+        existing.setEstimatedTimeMinutes(routeWay.getEstimatedTimeMinutes());
+        existing.setActive(routeWay.getActive());
 
         return routeWayRepository.save(existing);
     }
 
-    public RouteWay patchRoute(Long routeId, RouteWay routeWay) {
-        RouteWay existing = routeWayRepository.findById(routeId)
-                .orElseThrow(() -> new RuntimeException("Route not found"));
+    public RouteWay patchRoute(Long routeCode, RouteWay routeWay) {
+
+        RouteWay existing = getRouteByCode(routeCode);
 
         if (routeWay.getRouteName() != null)
             existing.setRouteName(routeWay.getRouteName());
+        if (routeWay.getActive() != null)
+            existing.setActive(routeWay.getActive());
 
-      
         return routeWayRepository.save(existing);
     }
 
-    public void deleteRoute(Long routeId) {
-        routeWayRepository.deleteById(routeId);
+    public void deleteRoute(Long routeCode) {
+        routeWayRepository.delete(getRouteByCode(routeCode));
     }
 
-    // ================= STOP =================
+    /* ============================== DRIVER DETAILS ========================================== */
 
-    public Stop addStop(Stop stop) {
-        return stopRepository.save(stop);
+    public DriverDetails addDriver(DriverDetails driver) {
+        driver.setActive(true);
+        return driverDetailsRepository.save(driver);
     }
 
-    public List<Stop> getStopsByRoute(Long routeId) {
-        return stopRepository.findByRouteRouteIdOrderBySequenceNumber(routeId);
+    public List<DriverDetails> getAllDrivers() {
+        return driverDetailsRepository.findAll();
     }
 
-    public Stop updateStop(Long stopId, Stop stop) {
-        Stop existing = stopRepository.findById(stopId)
-                .orElseThrow(() -> new RuntimeException("Stop not found"));
-
-        existing.setStopName(stop.getStopName());
-        existing.setSequenceNumber(stop.getSequenceNumber());
-        existing.setRoute(stop.getRoute());
-
-        return stopRepository.save(existing);
+    public List<DriverDetails> getActiveDrivers() {
+        return driverDetailsRepository.findByActiveTrue();
     }
 
-    public Stop patchStop(Long stopId, Stop stop) {
-        Stop existing = stopRepository.findById(stopId)
-                .orElseThrow(() -> new RuntimeException("Stop not found"));
-
-        if (stop.getStopName() != null)
-            existing.setStopName(stop.getStopName());
-
-
-        return stopRepository.save(existing);
+    public DriverDetails getDriverById(Long driverId) {
+        return driverDetailsRepository.findById(driverId)
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
     }
 
-    public void deleteStop(Long stopId) {
-        stopRepository.deleteById(stopId);
+    public DriverDetails updateDriver(Long driverId, DriverDetails driver) 
+    
+    {
+        DriverDetails existing = getDriverById(driverId);
+        existing.setFullName(driver.getFullName());
+        existing.setContactNumber(driver.getContactNumber());
+        return driverDetailsRepository.save(existing);
+    }
+    
+    public DriverDetails patchDriver(Long driverId, DriverDetails updates) {
+
+        DriverDetails existing = driverDetailsRepository.findById(driverId)
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
+
+        if (updates.getFullName() != null)
+            existing.setFullName(updates.getFullName());
+
+        if (updates.getContactNumber() != null)
+            existing.setContactNumber(updates.getContactNumber());
+
+        if (updates.getLicenseNumber() != null)
+            existing.setLicenseNumber(updates.getLicenseNumber());
+
+        if (updates.getLicenseExpiryDate() != null)
+            existing.setLicenseExpiryDate(updates.getLicenseExpiryDate());
+
+        if (updates.getRole() != null)
+            existing.setRole(updates.getRole());
+
+        if (updates.getExperienceCategory() != null)
+            existing.setExperienceCategory(updates.getExperienceCategory());
+
+        if (updates.getExperienceYears() != null)
+            existing.setExperienceYears(updates.getExperienceYears());
+
+        if (updates.getShift() != null)
+            existing.setShift(updates.getShift());
+
+        if (updates.getBackgroundVerified() != null)
+            existing.setBackgroundVerified(updates.getBackgroundVerified());
+
+        if (updates.getLicenseValidityStatus() != null)
+            existing.setLicenseValidityStatus(updates.getLicenseValidityStatus());
+
+        if (updates.getVerificationStatus() != null)
+            existing.setVerificationStatus(updates.getVerificationStatus());
+
+        if (updates.getActive() != null)
+            existing.setActive(updates.getActive());
+
+        if (updates.getVehicle() != null && updates.getVehicle().getId() != null)
+            existing.setVehicle(
+                vehicleRepository.findById(updates.getVehicle().getId())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found"))
+            );
+
+        if (updates.getRoute() != null && updates.getRoute().getId() != null)
+            existing.setRoute(
+                routeWayRepository.findById(updates.getRoute().getId())
+                    .orElseThrow(() -> new RuntimeException("Route not found"))
+            );
+
+        return driverDetailsRepository.save(existing);
     }
 
-    // ================= BUS PASS =================
 
-    public BusPass addBusPass(BusPass busPass) {
-        return busPassRepository.save(busPass);
+    public void deleteDriver(Long driverId) {
+        driverDetailsRepository.deleteById(driverId);
+    }
+  
+    /* ================================== CONDUCTOR DETAILS ======================================== */
+
+    public ConductorDetails addConductor(ConductorDetails conductor) {
+        conductor.setActive(true);
+        return conductorRepository.save(conductor);
     }
 
-    public List<BusPass> getAllBusPasses() {
-        return busPassRepository.findAll();
+    public List<ConductorDetails> getAllConductors() {
+        return conductorRepository.findAll();
     }
 
-    public BusPass updateBusPass(Long passId, BusPass busPass) {
-        BusPass existing = busPassRepository.findById(passId)
-                .orElseThrow(() -> new RuntimeException("Bus pass not found"));
-
-        existing.setExpiryDate(busPass.getExpiryDate());
-        existing.setPickUp(busPass.getPickUp());
-        existing.setStatus(busPass.getStatus());
-        existing.setBus(busPass.getBus());
-
-        return busPassRepository.save(existing);
+    public List<ConductorDetails> getActiveConductors() {
+        return conductorRepository.findByActiveTrue();
     }
 
-    public BusPass patchBusPass(Long passId, BusPass busPass) {
-        BusPass existing = busPassRepository.findById(passId)
-                .orElseThrow(() -> new RuntimeException("Bus pass not found"));
-
- 
-
-        if (busPass.getStatus() != null)
-            existing.setStatus(busPass.getStatus());
-
-        return busPassRepository.save(existing);
+    public ConductorDetails getConductorById(Long conductorId) {
+        return conductorRepository.findById(conductorId)
+                .orElseThrow(() -> new RuntimeException("Conductor not found"));
     }
 
-    public void deleteBusPass(Long passId) {
-        busPassRepository.deleteById(passId);
+    public ConductorDetails updateConductor(Long conductorId, ConductorDetails conductor) {
+
+        ConductorDetails existing = getConductorById(conductorId);
+
+        existing.setConductorName(conductor.getConductorName());
+        existing.setContactNumber(conductor.getContactNumber());
+        existing.setExperienceYears(conductor.getExperienceYears());
+        existing.setVerificationStatus(conductor.getVerificationStatus());
+        existing.setActive(conductor.getActive());
+
+        if (conductor.getRoute() != null && conductor.getRoute().getId() != null) {
+            RouteWay route = routeWayRepository.findById(conductor.getRoute().getId())
+                    .orElseThrow(() -> new RuntimeException("Route not found"));
+            existing.setRoute(route);
+        }
+
+        if (conductor.getVehicle() != null && conductor.getVehicle().getId() != null) {
+            Vehicle vehicle = vehicleRepository.findById(conductor.getVehicle().getId())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+            existing.setVehicle(vehicle);
+        }
+
+        return conductorRepository.save(existing);
+    }
+    public ConductorDetails patchConductor(Long conductorId, ConductorDetails conductor) {
+
+        ConductorDetails existing = getConductorById(conductorId);
+
+        if (conductor.getConductorName() != null)
+            existing.setConductorName(conductor.getConductorName());
+
+        if (conductor.getContactNumber() != null)
+            existing.setContactNumber(conductor.getContactNumber());
+
+        if (conductor.getExperienceYears() != null)
+            existing.setExperienceYears(conductor.getExperienceYears());
+
+        if (conductor.getVerificationStatus() != null)
+            existing.setVerificationStatus(conductor.getVerificationStatus());
+
+        if (conductor.getActive() != null)
+            existing.setActive(conductor.getActive());
+
+        if (conductor.getRoute() != null && conductor.getRoute().getId() != null) {
+            RouteWay route = routeWayRepository.findById(conductor.getRoute().getId())
+                    .orElseThrow(() -> new RuntimeException("Route not found"));
+            existing.setRoute(route);
+        }
+
+        if (conductor.getVehicle() != null && conductor.getVehicle().getId() != null) {
+            Vehicle vehicle = vehicleRepository.findById(conductor.getVehicle().getId())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+            existing.setVehicle(vehicle);
+        }
+
+        return conductorRepository.save(existing);
     }
 
-    // ================= BUS ROUTE =================
 
-    public BusRoute saveBusRoute(BusRoute busRoute) {
-        return busRouteMappingRepository.save(busRoute);
+    public void deleteConductor(Long conductorId) {
+        conductorRepository.deleteById(conductorId);
     }
 
-    public List<BusRoute> getAllBusRoutes() {
-        return busRouteMappingRepository.findAll();
+    //================================== VEHICLE GPS =================================== */
+
+    public VehicleGPS saveLocation(VehicleGPS gps) {
+        return gpsRepository.save(gps);
     }
 
-    public Optional<BusRoute> getBusRouteById(Long id) {
-        return busRouteMappingRepository.findById(id);
+    public VehicleGPS getLatestLocation(Long vehicleId) {
+        return gpsRepository
+                .findTopByVehicle_IdOrderByTimestampDesc(vehicleId)
+                .orElse(null);
+    }
+   
+    /* ============================== TRANSPORT ATTENDANCE ===================================== */
+
+    
+    // 🔹 Generate Daily QR for Vehicle
+    public byte[] generateVehicleQR(Long vehicleId, String type) {
+
+        String qrText =
+                "vehicleId=" + vehicleId +
+                "|date=" + LocalDate.now() +
+                "|type=" + type;
+
+        return QRCodeUtil.generateQRCode(qrText);
     }
 
-    public BusRoute patchBusRoute(Long id, BusRoute busRoute) {
-        BusRoute existing = busRouteMappingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("BusRoute not found"));
+    // Scan QR and Mark Attendance
+    public TransportAttendance markAttendance(Long studentId, String qrText) {
 
-       
-        return busRouteMappingRepository.save(existing);
+        Map<String, String> qrData = parseQRText(qrText);
+
+        Long vehicleId = Long.parseLong(qrData.get("vehicleId"));
+        LocalDate date = LocalDate.parse(qrData.get("date"));
+        String type = qrData.get("type");
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        TransportAttendance attendance =
+                attendanceRepository
+                        .findByStudentIdAndVehicleAndAttendanceDate(
+                                studentId, vehicle, date
+                        )
+                        .orElse(new TransportAttendance());
+
+        attendance.setStudentId(studentId);
+        attendance.setVehicle(vehicle);
+        attendance.setAttendanceDate(date);
+        attendance.setMarkedBy(TransportAttendance.MarkedBy.QRCODE);
+
+        if ("PICKUP".equalsIgnoreCase(type)) {
+            attendance.setPickupStatus(
+                    TransportAttendance.TransportAttendanceStatus.PICKED_UP);
+        } else if ("DROP".equalsIgnoreCase(type)) {
+            attendance.setDropStatus(
+                    TransportAttendance.TransportAttendanceStatus.DROPPED);
+        }
+
+        return attendanceRepository.save(attendance);
     }
 
-    public void deleteBusRoute(Long id) {
-        busRouteMappingRepository.deleteById(id);
+    // QR Text Parser
+    
+    private Map<String, String> parseQRText(String qrText) {
+        Map<String, String> map = new HashMap<>();
+        String[] parts = qrText.split("\\|");
+
+        for (String part : parts) {
+            String[] keyValue = part.split("=");
+            map.put(keyValue[0], keyValue[1]);
+        }
+        return map;
     }
 
-    public List<BusRoute> getByBusId(Long busId) {
-        return busRouteMappingRepository.findByBus_BusId(busId);
-    }
 
-    public List<BusRoute> getByRouteId(Long routeId) {
-        return busRouteMappingRepository.findByRoute_RouteId(routeId);
-    }
+	public @Nullable Object markAttendanceFromToken(String qrText) {
+		
+		return null;
+	}
 }

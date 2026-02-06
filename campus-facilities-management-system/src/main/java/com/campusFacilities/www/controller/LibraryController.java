@@ -1,10 +1,8 @@
 package com.campusFacilities.www.controller;
-
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,201 +10,254 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.campusFacilities.www.Transport.util.QRCodeUtil;
+import com.campusFacilities.www.model.Library.BookBarcode;
 import com.campusFacilities.www.model.Library.BookCategory;
 import com.campusFacilities.www.model.Library.BookIssueRecord;
+import com.campusFacilities.www.model.Library.BookIssueRecord.IssueRequest;
 import com.campusFacilities.www.model.Library.BookReservation;
 import com.campusFacilities.www.model.Library.Books;
 import com.campusFacilities.www.model.Library.LibraryFine;
-import com.campusFacilities.www.model.Library.LibraryMember;
 import com.campusFacilities.www.model.Library.LibrarySettings;
 import com.campusFacilities.www.service.Imp.LibraryServiceImpl;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/library")
+@RequiredArgsConstructor
 public class LibraryController {
 
     @Autowired
     private LibraryServiceImpl libraryService;
 
-    // ====== BOOKS ===================
+    // ============= BOOKS ===================//
     
     @PostMapping("/books")
-    public Books addBook(@RequestBody Books book) {
-        return libraryService.addBook(book);
+    @PreAuthorize("hasAuthority('BOOK_CREATE')")
+    public ResponseEntity<?> addBook(@RequestBody Books book) {
+        return ResponseEntity.ok(libraryService.createBook(book));
     }
 
     @GetMapping("/books")
-    public List<Books> getAllBooks() {
-        return libraryService.getAllBooks();
+    @PreAuthorize("hasAuthority('BOOK_VIEW')")
+    public ResponseEntity<?> getAllBooks() {
+        return ResponseEntity.ok(libraryService.getBooks());
     }
 
     @PutMapping("/books/{id}")
-    public Books updateBook(@PathVariable Long id, @RequestBody Books book) {
-        return libraryService.updateBook(id, book);
+    @PreAuthorize("hasAuthority('BOOK_UPDATE')")
+    public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody Books book) {
+        return ResponseEntity.ok(libraryService.updateBook(id, book));
     }
 
     @DeleteMapping("/books/{id}")
-    public String deleteBook(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('BOOK_DELETE')")
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         libraryService.deleteBook(id);
-        return "Book deleted successfully!";
+        return ResponseEntity.ok("Book deleted successfully!");
     }
 
-    // ====== BOOK CATEGORIES ======
+	/*
+	 * @PatchMapping("/books/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('BOOK_UPDATE')") public ResponseEntity<?>
+	 * patchBook(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+	 * return ResponseEntity.ok(libraryService.patchBook(id, updates));
+	 */
+    
+
+    // ================ BOOK CATEGORIES ================//
     
     @PostMapping("/categories")
-    public BookCategory addCategory(@RequestBody BookCategory category) {
-        return libraryService.addCategory(category);
+    @PreAuthorize("hasAuthority('BOOK_CATEGORY_CREATE')")
+    public ResponseEntity<?> addCategory(@RequestBody BookCategory category) {
+        return ResponseEntity.ok(libraryService.createCategory(category));
     }
+
     @GetMapping("/categories")
-    public List<BookCategory> getAllCategories() {
-        return libraryService.getAllCategories();
+    @PreAuthorize("hasAuthority('BOOK_CATEGORY_VIEW')")
+    public ResponseEntity<?> getAllCategories() {
+        return ResponseEntity.ok(libraryService.getCategories());
     }
 
     @PutMapping("/categories/{id}")
-    public BookCategory updateCategory(@PathVariable Long id, @RequestBody BookCategory category) {
-        return libraryService.updateCategory(id, category);
+    @PreAuthorize("hasAuthority('BOOK_CATEGORY_UPDATE')")
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody BookCategory category) {
+        return ResponseEntity.ok(libraryService.updateCategory(id, category));
     }
 
     @DeleteMapping("/categories/{id}")
-    public String deleteCategory(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('BOOK_CATEGORY_DELETE')")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
         libraryService.deleteCategory(id);
-        return "Category deleted successfully!";
+        return ResponseEntity.ok("Category deleted successfully!");
     }
-   
-    // ====== ISSUE RECORDS ======
+
+	/*
+	 * @PatchMapping("/categories/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('BOOK_CATEGORY_UPDATE')") public
+	 * ResponseEntity<?> patchCategory(@PathVariable Long id, @RequestBody
+	 * Map<String, Object> updates) { return
+	 * ResponseEntity.ok(libraryService.patchCategory(id, updates)); }
+	 */
+
+    
+    // ================= ISSUE RECORDS ================//
     
     @PostMapping("/issue")
-    public BookIssueRecord issueBook(@RequestBody IssueRequest request) {
-        return libraryService.issueBook(request.getBookId(), request.getMemberId());
-    }
- 
-    @Data
-    public static class IssueRequest {
-        private Long bookId;
-        private Long memberId;
+    @PreAuthorize("hasAuthority('BOOK_ISSUE_RECORD_CREATE')")
+    public ResponseEntity<?> issueBook(@RequestBody IssueRequest request) {
+        return ResponseEntity.ok(
+            libraryService.issueBook(request.getBookId(), request.getUserId(), null)
+        );
     }
 
     @GetMapping("/issues")
-    public List<Books> getAllIssuedBooks() {
-        return libraryService.getAllBooks();
+    @PreAuthorize("hasAuthority('BOOK_ISSUE_RECORD_VIEW')")
+    public List<BookIssueRecord> getAllIssuedBooks() {
+        return libraryService.getIssues();
     }
+
     @PutMapping("/return/{id}")
-    public BookIssueRecord returnBook(@PathVariable Long id) {
-        return libraryService.returnBook(id);
+    @PreAuthorize("hasAuthority('BOOK_ISSUE_RECORD_UPDATE')")
+    public ResponseEntity<?> returnBook(@PathVariable Long id) {
+        return ResponseEntity.ok(libraryService.returnBook(id));
     }
 
-    @DeleteMapping("/issues/{id}")
-    public String deleteIssueRecord(@PathVariable Long id) {
-        libraryService.deleteIssueRecord(id);
-        return "Issue record deleted successfully!";
-    }
+ 
 
+	/*
+	 * @PatchMapping("/issues/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('BOOK_ISSUE_RECORD_UPDATE')") public
+	 * ResponseEntity<?> patchIssueRecord(@PathVariable Long id,
+	 * 
+	 * @RequestBody Map<String, Object> updates) { return
+	 * ResponseEntity.ok(libraryService.patchIssueRecord(id, updates)); }
+	 * 
+	 * 
+	 */
     
-    // ====== RESERVATIONS ======
+    // =================== RESERVATIONS ========================//
+    
     @PostMapping("/reservations")
-    public BookReservation addReservation(@RequestBody BookReservation reservation) {
-        return libraryService.addReservation(reservation);
+    @PreAuthorize("hasAuthority('BOOK_RESERVATION_CREATE')")
+    public ResponseEntity<?> addReservation(@RequestBody BookReservation reservation) {
+        return ResponseEntity.ok(libraryService.createReservation(reservation));
     }
 
-    @GetMapping("/reservationses")
-    public List<BookReservation> getAllReservations() {
-        return libraryService.getAllReservations();
+    @GetMapping("/reservations")
+    @PreAuthorize("hasAuthority('BOOK_RESERVATION_VIEW')")
+    public ResponseEntity<?> getAllReservations() {
+        return ResponseEntity.ok(libraryService.getReservations());
     }
 
-    @PutMapping("/reservations/{id}")
-    public BookReservation updateReservation(@PathVariable Long id, @RequestBody BookReservation reservation) {
-        return libraryService.updateReservation(id, reservation);
-    }
+	/*
+	 * @PatchMapping("/reservations/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('BOOK_RESERVATION_CREATE')") public
+	 * ResponseEntity<?> patchReservation(@PathVariable Long id,
+	 * 
+	 * @RequestBody Map<String, Object> updates) { return
+	 * ResponseEntity.ok(libraryService.patchReservation(id, updates)); }
+	 */
 
-    @DeleteMapping("/reservations/{id}")
-    public String deleteReservation(@PathVariable Long id) {
-        libraryService.deleteReservation(id);
-        return "Reservation deleted successfully!";
-    }
 
-    // ====== FINES ======
-    @PostMapping("/fines")
-    public LibraryFine addFine(@RequestBody LibraryFine fine) {
-        return libraryService.addFine(fine);
-    }
-
+    // ================== FINES ======================//
+    
+    
     @GetMapping("/fines")
-    public List<LibraryFine> getAllFines() {
-        return libraryService.getAllFines();
+    @PreAuthorize("hasAuthority('LIBRARY_FINE_VIEW')")
+    public ResponseEntity<?> getAllFines() {
+        return ResponseEntity.ok(libraryService.getFines());
     }
 
     @PutMapping("/fines/{id}")
-    public LibraryFine updateFine(@PathVariable Long id, @RequestBody LibraryFine fine) {
-        return libraryService.updateFine(id, fine);
+    @PreAuthorize("hasAuthority('LIBRARY_FINE_UPDATE')")
+    public ResponseEntity<?> updateFine(@PathVariable Long id, @RequestBody LibraryFine fine) {
+        Long studentId = null;
+		return ResponseEntity.ok(libraryService.getFinesByUserId(studentId));
     }
 
-    @DeleteMapping("/fines/{id}")
-    public String deleteFine(@PathVariable Long id) {
-        libraryService.deleteFine(id);
-        return "Fine deleted successfully!";
-    }
-
-    //========Members========
+ 
     
-    // CREATE a new library member
-    @PostMapping("/member")
-    public ResponseEntity<LibraryMember> createMember(@RequestBody LibraryMember member) {
-        LibraryMember createdMember = libraryService.addMember(member);
-        return new ResponseEntity<>(createdMember, HttpStatus.CREATED);
-    }
-
-    // GET all library members
-    @GetMapping("/members")
-    public ResponseEntity<List<LibraryMember>> getAllMembers() {
-        List<LibraryMember> members = libraryService.getAllMembers();
-        return ResponseEntity.ok(members);
-    }
-
-    // GET a single member by ID
-    @GetMapping("/members/{id}")
-    public ResponseEntity<LibraryMember> getMemberById(@PathVariable Long id) {
-        LibraryMember member = libraryService.getMemberById(id);
-        return ResponseEntity.ok(member);
-    }
-
-    // UPDATE an existing member
-    @PutMapping("/members/{id}")
-    public ResponseEntity<LibraryMember> updateMember(
-            @PathVariable Long id,
-            @RequestBody LibraryMember member) {
-        LibraryMember updatedMember = libraryService.updateMember(id, member);
-        return ResponseEntity.ok(updatedMember);
-    }
-
-    // DELETE a member
-    @DeleteMapping("/members/{id}")
-    public ResponseEntity<String> deleteMember(@PathVariable Long id) {
-        libraryService.deleteMember(id);
-        return ResponseEntity.ok("Library member deleted successfully");
-    }
-    // ====== SETTINGS ======
+    //==================Members====================//
+	/*
+	 * @PostMapping("/members")
+	 * 
+	 * @PreAuthorize("hasAuthority('LIBRARY_MEMBER_CREATE')") public
+	 * ResponseEntity<?> createMember(@RequestBody LibraryMember member) { return
+	 * ResponseEntity.status(HttpStatus.CREATED)
+	 * .body(libraryService.addMember(member)); }
+	 * 
+	 * @GetMapping("/members")
+	 * 
+	 * @PreAuthorize("hasAuthority('LIBRARY_MEMBER_VIEW')") public ResponseEntity<?>
+	 * getAllMembers() { return ResponseEntity.ok(libraryService.getAllMembers()); }
+	 * 
+	 * @GetMapping("/members/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('LIBRARY_MEMBER_VIEW')") public ResponseEntity<?>
+	 * getMemberById(@PathVariable Long id) { return
+	 * ResponseEntity.ok(libraryService.getMemberById(id)); }
+	 * 
+	 * @PutMapping("/members/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('LIBRARY_MEMBER_UPDATE')") public
+	 * ResponseEntity<?> updateMember(@PathVariable Long id,
+	 * 
+	 * @RequestBody LibraryMember member) { return
+	 * ResponseEntity.ok(libraryService.updateMember(id, member)); }
+	 * 
+	 * @DeleteMapping("/members/{id}")
+	 * 
+	 * @PreAuthorize("hasAuthority('LIBRARY_MEMBER_DELETE')") public
+	 * ResponseEntity<?> deleteMember(@PathVariable Long id) {
+	 * libraryService.deleteMember(id); return
+	 * ResponseEntity.ok("Library member deleted successfully"); }
+	 */
+    // ================== SETTINGS ==================//
+    
     @PostMapping("/settings")
-    public LibrarySettings addSettings(@RequestBody LibrarySettings settings) {
-        return libraryService.addSettings(settings);
+    @PreAuthorize("hasAuthority('LIBRARY_SETTING_CREATE')")
+    public ResponseEntity<?> addSettings(@RequestBody LibrarySettings settings) {
+        return ResponseEntity.ok(libraryService.saveSettings(settings));
     }
 
     @GetMapping("/settings")
-    public List<LibrarySettings> getSettings() {
-        return libraryService.getAllSettings();
+    @PreAuthorize("hasAuthority('LIBRARY_SETTING_VIEW')")
+    public ResponseEntity<?> getSettings() {
+        return ResponseEntity.ok(libraryService.getSettings());
     }
 
-    @PutMapping("/settings/{id}")
-    public LibrarySettings updateSettings(@PathVariable Long id, @RequestBody LibrarySettings settings) {
-        return libraryService.updateSettings(id, settings);
+    
+ // ================= BARCODES =================
+
+    @PostMapping("/books/{id}/generate-barcodes")
+    @PreAuthorize("hasAuthority('BOOK_UPDATE')")
+    public ResponseEntity<List<BookBarcode>> generateBarcodes(
+            @PathVariable Long id,
+            @RequestParam int count) {
+
+        return ResponseEntity.ok(
+                libraryService.generateBarcodes(id, count)
+        );
     }
 
-    @DeleteMapping("/settings/{id}")
-    public String deleteSettings(@PathVariable Long id) {
-        libraryService.deleteSettings(id);
-        return "Settings deleted successfully!";
+    // ================= QR CODES =================
+
+    @GetMapping(value = "/qr-code", produces = "image/png")
+    @PreAuthorize("hasAuthority('BOOK_VIEW')")
+    public ResponseEntity<byte[]> getQRCode(
+            @RequestParam String data) throws Exception {
+
+        return ResponseEntity.ok(
+                QRCodeUtil.generateQRCode(data)
+        );
     }
+
 }

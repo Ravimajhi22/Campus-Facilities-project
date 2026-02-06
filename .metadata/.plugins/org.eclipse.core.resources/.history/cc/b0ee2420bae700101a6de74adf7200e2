@@ -1,5 +1,0 @@
-package com.campusFacilities.www.repository.Hostel;
-
-
-@Repository
-public interface HostelRoomRepository extends JpaRepository<HostelRoom, Long> {}

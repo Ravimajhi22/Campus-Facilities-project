@@ -1,9 +1,14 @@
 package com.campusFacilities.www.model.Hostel;
-
 import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,18 +24,41 @@ public class StudentHostelAllocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long allocationId;
-
-	/*
-	 * @ManyToOne
-	 * 
-	 * @JoinColumn(name = "user_id", nullable = false) private User user;
-	 */
     
-    @ManyToOne
+    @Column(nullable = false)
+    private Long studentId;
+
+    private String studentName;
+    private String studentEmail;
+    
+
+    @JsonProperty("fatherName")
+    private String parentName;
+
+    @JsonProperty("fatherPhone")
+    private String parentPhone;
+    
+    
+    // ---------------- Hostel Mapping ----------------
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hostel_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Hostel hostel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private HostelRoom room;
 
+    @Column
+    private String hostelName;
+
+    @Column
+    private String roomNumber;
+    
     private LocalDate joinDate;
+    
     private LocalDate leaveDate;
 
     @Enumerated(EnumType.STRING)
@@ -42,8 +70,5 @@ public class StudentHostelAllocation {
         CHECKED_OUT,
         CANCELLED
     }
-
-	/*
-	 * @CreationTimestamp private Timestamp createdAt;
-	 */
+    
 }
